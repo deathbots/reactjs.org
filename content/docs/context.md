@@ -169,16 +169,88 @@ A more complex example with dynamic values for the theme:
 
 ### Updating Context from a Nested Component {#updating-context-from-a-nested-component}
 
-It is often necessary to update the context from a component that is nested somewhere deeply in the component tree. In this case you can pass a function down through the context to allow consumers to update the context:
+It is often necessary to update the context from a component that is nested somewhere deeply in the component tree. In this case you can pass **"context functions"** down as part of the context to allow consumers to update properties in the context itself.  In this example, we add a new `toggleTheme` property to the `ThemeContext` object and then assign a `customThemeToggler` implementation function to that property.
+
+Remember: In JavaScript, functions are [**"first-class objects"**](https://stackoverflow.com/questions/705173/what-is-meant-by-first-class-object) which, among other things, means that ***functions themeselves*** can actually be passed around ***in an object***, just like any other property (string, number, etc). 🙂
+
+[Here is a working code sandbox of this example.](https://codesandbox.io/s/react-hooks-update-context-from-nested-component-forked-t70up?file=/src/App.js)
 
 **theme-context.js**
-`embed:context/updating-nested-context-context.js`
-
-**theme-toggler-button.js**
-`embed:context/updating-nested-context-theme-toggler-button.js`
+```js{1-3,6-10}
+// We now add this new 'toggleTheme' property which points to a function that
+// will be responsible for toggling the theme.
+// Reminder: These default settings are never seen if overridden in /App.js
+export const ThemeContext = React.createContext({
+  theme: themes.dark,
+  toggleTheme: () => {
+    console.log(
+      "Default 'toggleTheme' function has been called! " +
+        "If I am overriden, I will never appear!"
+    );
+  }
+});
+```
 
 **app.js**
-`embed:context/updating-nested-context-app.js`
+```js{5-7,11,14,17}
+import { useState } from "react";
+import { ThemeContext, themes } from "./theme-context";
+import ThemeTogglerButton from "./theme-toggler-button";
+
+// ThemeContext's 'toggleTheme' property (again, a function), now needs to be
+// actually implemented! You can assign any function to the context's
+// 'toggleTheme' property. In our case, we assign 'customThemeToggler'
+export const App = () => {
+  const [themeContext, setThemeContext] = useState({
+    theme: themes.light,
+    toggleTheme: customThemeToggler
+  });
+
+  function customThemeToggler() {
+    setThemeContext((oldContext) => ({
+      theme: oldContext.theme === themes.light ? themes.dark : themes.light,
+      toggleTheme: customThemeToggler
+    }));
+  }
+
+  return (
+    <ThemeContext.Provider value={themeContext}>
+      <Content />
+    </ThemeContext.Provider>
+  );
+};
+
+function Content() {
+  return (
+    <div>
+      <ThemeTogglerButton />
+    </div>
+  );
+}
+```
+
+**theme-toggler-button.js**
+```js{5-6,11}
+import { useContext } from "react";
+import { ThemeContext } from "./theme-context";
+
+function ThemeTogglerButton() {
+  // The Theme Toggler Button receives not only the theme
+  // but also a 'toggleTheme' function from ThemeContext
+  const themeContext = useContext(ThemeContext);
+
+  return (
+    <button
+      onClick={themeContext.toggleTheme}
+      style={{ backgroundColor: themeContext.theme.background }}
+    >
+      Toggle Theme
+    </button>
+  );
+}
+
+export default ThemeTogglerButton;
+```
 
 ### Consuming Multiple Contexts {#consuming-multiple-contexts}
 

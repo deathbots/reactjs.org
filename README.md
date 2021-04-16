@@ -4,10 +4,6 @@ This repo contains a modified version of the source code and documentation power
 
 ## Unresolved issues with modifying the docs to be 100% hooks
 
-### Context update functions are awkward
-
-Not sure what the best practice is for [context updating](content/docs/context.md#updating-context-from-a-nested-component). The old way required putting the context update function in the app state, but this is a lot more verbose with hooks, and requires two providers to avoid the rendering issue mentioned in [the caveats section](content/docs/context.md#caveats).
-
 ### Error boundaries are not currently possible using hooks
 
 As such, for now the sidebar link to [the error boundaries page](content/docs/error-boundaries.md) has been removed.
