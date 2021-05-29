@@ -233,7 +233,7 @@ could be rewritten using `concat` as:
 ```javascript
 function handleClick() {
   const newWords = words.concat(['marklar']);
-  setWords(words);
+  setWords(newWords);
 }
 ```
 
